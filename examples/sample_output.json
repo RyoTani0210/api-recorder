@@ -1,0 +1,246 @@
+{
+  "scenario": "booking_flow",
+  "recorded_at": "2025-12-21T15:30:00.000Z",
+  "base_url": "https://automationintesting.online",
+  "config": {
+    "include_patterns": ["/api/"],
+    "exclude_patterns": [".css", ".js", ".woff", ".woff2", ".ttf", ".ico", ".png", ".jpg", ".jpeg", ".gif", ".svg"],
+    "body_size_limit": 10000
+  },
+  "entries": [
+    {
+      "seq": 1,
+      "timestamp": "2025-12-21T15:30:01.234Z",
+      "page_url": "https://automationintesting.online/",
+      "duration_ms": 156,
+      "request": {
+        "method": "GET",
+        "url": "/api/branding",
+        "headers": {
+          "accept": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "status_text": "OK",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "name": "Shady Meadows B&B",
+          "map": {
+            "latitude": 52.6351204,
+            "longitude": 1.2733774
+          },
+          "logoUrl": "https://www.mwtestconsultancy.co.uk/img/rbp-logo.png",
+          "description": "Welcome to Shady Meadows, a delightful Bed & Breakfast nestled in the hills on Exmoor. Temporary quote from chatgpt: Nestled among rolling hills and framed by centuries-old oaks, Shady Meadows B&B offers a tranquil escape from the bustle of modern life.",
+          "contact": {
+            "name": "Shady Meadows B&B",
+            "address": "The Old Farmhouse, Shady Street, Newfordburyshire, NE1 410S",
+            "phone": "0123456789",
+            "email": "fake@fakeemail.com"
+          }
+        },
+        "body_truncated": false
+      }
+    },
+    {
+      "seq": 2,
+      "timestamp": "2025-12-21T15:30:01.456Z",
+      "page_url": "https://automationintesting.online/",
+      "duration_ms": 189,
+      "request": {
+        "method": "GET",
+        "url": "/api/room",
+        "headers": {
+          "accept": "application/json"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "status_text": "OK",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "rooms": [
+            {
+              "roomid": 1,
+              "roomName": "101",
+              "type": "Single",
+              "accessible": true,
+              "image": "https://www.mwtestconsultancy.co.uk/img/room1.jpg",
+              "description": "Aenean porttitor mauris sit amet lacinia molestie. In posuere accumsan aliquet.",
+              "features": ["WiFi", "TV", "Safe"],
+              "roomPrice": 100
+            },
+            {
+              "roomid": 2,
+              "roomName": "102",
+              "type": "Double",
+              "accessible": false,
+              "image": "https://www.mwtestconsultancy.co.uk/img/room2.jpg",
+              "description": "Aenean porttitor mauris sit amet lacinia molestie. In posuere accumsan aliquet.",
+              "features": ["WiFi", "TV", "Mini Bar"],
+              "roomPrice": 150
+            }
+          ]
+        },
+        "body_truncated": false
+      }
+    },
+    {
+      "seq": 3,
+      "timestamp": "2025-12-21T15:30:25.789Z",
+      "page_url": "https://automationintesting.online/",
+      "duration_ms": 234,
+      "request": {
+        "method": "POST",
+        "url": "/api/booking",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json"
+        },
+        "body": {
+          "roomid": 1,
+          "firstname": "Taro",
+          "lastname": "Yamada",
+          "depositpaid": true,
+          "email": "taro@example.com",
+          "phone": "09012345678",
+          "bookingdates": {
+            "checkin": "2025-01-10",
+            "checkout": "2025-01-12"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "status_text": "Created",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "bookingid": 1,
+          "booking": {
+            "roomid": 1,
+            "firstname": "Taro",
+            "lastname": "Yamada",
+            "depositpaid": true,
+            "bookingdates": {
+              "checkin": "2025-01-10",
+              "checkout": "2025-01-12"
+            }
+          }
+        },
+        "body_truncated": false
+      }
+    },
+    {
+      "seq": 4,
+      "timestamp": "2025-12-21T15:31:10.123Z",
+      "page_url": "https://automationintesting.online/#/admin",
+      "duration_ms": 178,
+      "request": {
+        "method": "POST",
+        "url": "/api/auth/login",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json"
+        },
+        "body": {
+          "username": "admin",
+          "password": "password"
+        }
+      },
+      "response": {
+        "status": 200,
+        "status_text": "OK",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        },
+        "body_truncated": false
+      }
+    },
+    {
+      "seq": 5,
+      "timestamp": "2025-12-21T15:31:15.456Z",
+      "page_url": "https://automationintesting.online/#/admin",
+      "duration_ms": 145,
+      "request": {
+        "method": "GET",
+        "url": "/api/booking/?roomid=1",
+        "headers": {
+          "accept": "application/json",
+          "cookie": "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "status_text": "OK",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "bookings": [
+            {
+              "bookingid": 1,
+              "roomid": 1,
+              "firstname": "Taro",
+              "lastname": "Yamada",
+              "depositpaid": true,
+              "bookingdates": {
+                "checkin": "2025-01-10",
+                "checkout": "2025-01-12"
+              }
+            }
+          ]
+        },
+        "body_truncated": false
+      }
+    },
+    {
+      "seq": 6,
+      "timestamp": "2025-12-21T15:32:00.789Z",
+      "page_url": "https://automationintesting.online/",
+      "duration_ms": 201,
+      "request": {
+        "method": "POST",
+        "url": "/api/message",
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json"
+        },
+        "body": {
+          "name": "Hanako Suzuki",
+          "email": "hanako@example.com",
+          "phone": "09087654321",
+          "subject": "Question about breakfast",
+          "description": "What time is breakfast served? Do you offer vegetarian options?"
+        }
+      },
+      "response": {
+        "status": 201,
+        "status_text": "Created",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "messageid": 1,
+          "name": "Hanako Suzuki",
+          "email": "hanako@example.com",
+          "phone": "09087654321",
+          "subject": "Question about breakfast",
+          "description": "What time is breakfast served? Do you offer vegetarian options?"
+        },
+        "body_truncated": false
+      }
+    }
+  ]
+}

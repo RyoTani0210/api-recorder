@@ -1,0 +1,20 @@
+{
+  "name": "api-recorder",
+  "version": "1.0.0",
+  "description": "Record API requests/responses from web pages using Playwright",
+  "main": "src/recorder.js",
+  "bin": {
+    "api-recorder": "./src/cli.js"
+  },
+  "scripts": {
+    "record": "node src/cli.js",
+    "test": "node src/cli.js --url https://automationintesting.online/ --scenario test --duration 30"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
