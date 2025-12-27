@@ -1,141 +1,213 @@
 ---
 name: api-recorder
-description: "WebページのAPIリクエスト/レスポンスを記録するスキル。以下の場合に使用: (1) ユーザ操作中のAPIトラフィックのキャプチャ, (2) APIシナリオログの生成, (3) テスト設計者向けのAPI仕様ドキュメント作成"
+description: "Record API requests and responses during web interactions using Playwright. Use when capturing API traffic, analyzing network calls, generating API logs, or documenting API behavior for testing."
 ---
 
-# API Recorder
+# APIレコーダー
 
 ## 概要
 
-Webサイトのユーザ操作中に発生するAPIリクエスト/レスポンスを記録し、JSONログとして保存するスキルです。Playwrightを使用してブラウザを起動し、ネットワーク通信を監視します。
+Webブラウジングセッション中のHTTP APIリクエストとレスポンスを記録します。リクエスト/レスポンスの詳細、ヘッダー、ボディ、タイミング情報を含むJSONログを生成します。
 
-## 対応環境
+**使用技術:** Playwright (Chromium)
 
-| 環境 | 対応状況 |
-|------|---------|
-| Claude Code | ✅ |
-| Claude Desktop | ✅ |
-| Claude.ai (Computer Use) | ✅ |
+## クイックスタート
 
-## セットアップ
-
-### 1. 依存関係のインストール
+### 基本的な記録
 
 ```bash
-cd /path/to/api-recorder
+cd .claude/skills/api-recorder
 npm install
+node src/cli.js --url https://automationintesting.online/ --scenario "hotel_booking"
 ```
 
-### 2. Playwrightブラウザのインストール（初回のみ）
+**何が起こるか:**
+1. ターゲットURLでブラウザが開く
+2. サイトを操作（クリック、フォーム入力、ナビゲート）
+3. すべてのAPI呼び出しが自動的にキャプチャされる
+4. Ctrl+Cを押すか、タイムアウトを待つ
+5. すべてのAPIトラフィックを含むJSONファイルが保存される
 
-```bash
-npx playwright install chromium
-```
-
-## 使い方
-
-### 基本コマンド
-
-```bash
-node src/cli.js --url <URL> [options]
-```
-
-### オプション一覧
-
-| オプション | 短縮形 | 説明 | デフォルト |
-|-----------|-------|------|-----------|
-| `--url` | `-u` | 対象URL（必須） | - |
-| `--scenario` | `-s` | シナリオ名 | `scenario_YYYYMMDD_HHMMSS` |
-| `--output` | `-o` | 出力ファイルパス | `<timestamp>_<scenario>.json` |
-| `--duration` | `-d` | 記録時間（秒） | 60 |
-| `--include` | `-i` | 記録対象パターン（カンマ区切り） | `/api/` |
-| `--exclude` | `-e` | 除外パターン（カンマ区切り） | 静的ファイル |
-| `--headless` | - | ヘッドレスモード | false |
-| `--body-limit` | - | レスポンスサイズ上限（バイト） | 10000 |
-
-### 実行例
-
-**基本的な記録:**
-```bash
-node src/cli.js --url https://automationintesting.online/ --scenario "部屋予約フロー"
-```
-
-**長時間記録:**
-```bash
-node src/cli.js -u https://example.com -d 300 -s "full_scenario"
-```
-
-**特定のAPIのみ記録:**
-```bash
-node src/cli.js -u https://example.com -i "/api/room,/api/booking"
-```
-
-**ヘッドレスモード（CI向け）:**
-```bash
-node src/cli.js -u https://example.com --headless -d 30
-```
-
-## ワークフロー
-
-### Claude Code / Claude Desktop での使用
-
-```
-ユーザ: このサイトのAPIを記録して https://automationintesting.online/
-
-Claude: 了解しました。APIレコーダーを実行します。
-
-        [bash実行]
-        cd /path/to/api-recorder
-        npm install
-        node src/cli.js --url https://automationintesting.online/ --scenario "hotel_api" --duration 60
-
-        ブラウザが開きました。60秒間操作してください。
-        記録を早く終了したい場合は Ctrl+C を押してください。
-
-        [60秒後または Ctrl+C 後]
-        
-        記録が完了しました。
-        出力ファイル: 20251221_153000_hotel_api.json
-        記録されたAPI: 12件
-```
-
-### 対話的な使用
-
-1. Claudeに「APIを記録したい」と伝える
-2. URLとシナリオ名を指定
-3. ブラウザが開いたら操作を行う
-4. 時間経過または Ctrl+C で記録終了
-5. JSONファイルが出力される
-
-## 出力フォーマット
+### 出力例
 
 ```json
 {
-  "scenario": "部屋予約フロー",
-  "recorded_at": "2025-12-21T15:30:00.000Z",
-  "base_url": "https://automationintesting.online",
+  "scenario": "hotel_booking",
+  "recorded_at": "2025-12-27T10:30:00.000Z",
+  "entries": [
+    {
+      "seq": 1,
+      "request": {
+        "method": "GET",
+        "url": "/api/room",
+        "headers": {...}
+      },
+      "response": {
+        "status": 200,
+        "body": {"rooms": [...]},
+        "duration_ms": 156
+      }
+    }
+  ]
+}
+```
+
+## コアワークフロー
+
+1. **CLIディレクトリに移動**
+   ```bash
+   cd .claude/skills/api-recorder
+   ```
+
+2. **依存関係がインストールされていることを確認**
+   ```bash
+   npm install
+   npx playwright install chromium  # 初回のみ
+   ```
+
+3. **記録を開始**
+   ```bash
+   node src/cli.js --url <対象URL> --scenario "シナリオ名"
+   ```
+
+4. **サイトを操作**
+   - ブラウザが自動的に開く
+   - ユーザーアクションを実行（ログイン、フォーム入力、ナビゲート）
+   - すべてのAPI呼び出しがバックグラウンドでキャプチャされる
+
+5. **記録を停止**
+   - 期間を待つ（デフォルト: 60秒）
+   - またはCtrl+Cで早期停止
+
+6. **出力をレビュー**
+   - JSONファイルが作成される: `YYYYMMDD_HHMMSS_シナリオ名.json`
+   - キャプチャされたすべてのAPIリクエスト/レスポンスを含む
+
+## 一般的なユースケース
+
+### ユースケース1: API発見
+
+**シナリオ:** WebアプリがどのAPIを使用しているか理解する
+
+```bash
+node src/cli.js -u https://example.com -s "api_discovery" -d 120
+```
+
+**結果:** 操作中に呼び出されたすべてのAPIエンドポイントの完全なログ
+
+### ユースケース2: テストデータ生成
+
+**シナリオ:** テストフィクスチャー用の実際のAPIレスポンスをキャプチャ
+
+```bash
+node src/cli.js -u https://staging.example.com -s "test_data" -i "/api/"
+```
+
+**結果:** テストモックとして使用可能なJSONレスポンス
+
+### ユースケース3: APIドキュメント作成
+
+**シナリオ:** 実際の例でAPIの動作を文書化
+
+```bash
+node src/cli.js -u https://example.com -s "api_docs" --include "/api/v1/"
+```
+
+**結果:** ドキュメント用の完全なリクエスト/レスポンス例
+
+## 主要オプション
+
+| オプション | 説明 | 例 |
+|--------|-------------|---------|
+| `--url` `-u` | 対象URL（必須） | `-u https://example.com` |
+| `--scenario` `-s` | シナリオ名 | `-s "user_login"` |
+| `--duration` `-d` | 記録時間（秒） | `-d 120` |
+| `--include` `-i` | キャプチャするURLパターン | `-i "/api/,/graphql"` |
+
+**デフォルト動作:**
+- `/api/`にマッチするURLを記録
+- 静的ファイル（.css、.js、画像）を除外
+- レスポンスボディを10KBに制限
+- ヘッドモードで実行（ブラウザ表示）
+
+## クイック例
+
+**特定のAPIのみ:**
+```bash
+node src/cli.js -u https://example.com -i "/api/booking"
+```
+
+**長時間セッション:**
+```bash
+node src/cli.js -u https://example.com -d 300
+```
+
+**ヘッドレス（CI/CD）:**
+```bash
+node src/cli.js -u https://example.com --headless -d 60
+```
+
+## 認証の処理
+
+**アプローチ:**
+1. `--headless`フラグを使用しない
+2. UIでブラウザが開く
+3. 手動でログイン
+4. 操作を続ける
+5. 記録が認証済みリクエストをキャプチャ
+
+**注意:** トークンとCookieは出力に保存されます。安全に取り扱ってください。
+
+## キャプチャトラフィックのフィルタリング
+
+### インクルードパターン（何を記録するか）
+
+**デフォルト:** `/api/`（APIエンドポイントのみ）
+
+**カスタム:**
+```bash
+--include "/api/,/v1/,/graphql"  # 複数パターン
+--include "*"                     # すべて
+```
+
+### エクスクルードパターン（何を無視するか）
+
+**デフォルト:** 静的ファイル（.css、.js、.woff、画像）
+
+**カスタム:**
+```bash
+--exclude ".css,.js,.map"  # カスタム除外
+```
+
+## 出力構造
+
+各記録には以下が含まれます:
+
+```json
+{
+  "scenario": "シナリオ名",
+  "recorded_at": "ISOタイムスタンプ",
+  "base_url": "https://example.com",
   "config": {
-    "include_patterns": ["/api/"],
-    "exclude_patterns": [".css", ".js", ".woff", "..."],
-    "body_size_limit": 10000
+    "include_patterns": [...],
+    "exclude_patterns": [...]
   },
   "entries": [
     {
       "seq": 1,
-      "timestamp": "2025-12-21T15:30:01.234Z",
-      "page_url": "https://automationintesting.online/",
+      "timestamp": "ISOタイムスタンプ",
+      "page_url": "現在のページURL",
       "duration_ms": 156,
       "request": {
         "method": "GET",
-        "url": "/api/room",
-        "headers": { "accept": "application/json" },
-        "body": null
+        "url": "/api/endpoint",
+        "headers": {...},
+        "body": {...}
       },
       "response": {
         "status": 200,
-        "status_text": "OK",
-        "headers": { "content-type": "application/json" },
-        "body": { "rooms": [...] },
+        "headers": {...},
+        "body": {...},
         "body_truncated": false
       }
     }
@@ -143,121 +215,81 @@ Claude: 了解しました。APIレコーダーを実行します。
 }
 ```
 
-### レスポンスサイズ超過時
-
-```json
-"response": {
-  "status": 200,
-  "status_text": "OK",
-  "headers": { "content-type": "application/json" },
-  "body": { "_truncated": true, "_preview": "..." },
-  "body_truncated": true,
-  "body_original_size": 245000
-}
-```
-
-## 記録対象のフィルタリング
-
-### include_patterns
-
-URLパスがこのパターンにマッチする場合に記録します。
-
-**デフォルト:** `/api/`
-
-**カスタム例:**
-```bash
-# 複数のAPIパス
---include "/api/,/v1/,/graphql"
-
-# 全てのリクエスト
---include "*"
-```
-
-### exclude_patterns
-
-このパターンにマッチするURLは記録しません。
-
-**デフォルト:** `.css`, `.js`, `.woff`, `.woff2`, `.ttf`, `.ico`, `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`
-
-**カスタム例:**
-```bash
-# 除外パターンを追加
---exclude ".css,.js,.map,.woff"
-```
-
-## プログラムからの使用
+## プログラマティックな使用
 
 ```javascript
 const { APIRecorder } = require('./src/recorder.js');
 
-async function main() {
+async function record() {
   const recorder = new APIRecorder({
     scenarioName: 'my_scenario',
-    includePatterns: ['/api/'],
-    headless: false,
-    bodySizeLimit: 10000
+    includePatterns: ['/api/']
   });
 
-  // 記録開始
-  const page = await recorder.start('https://automationintesting.online/');
-  
-  // プログラムで操作（オプション）
-  // await page.click('button#submit');
-  
-  // 一定時間待機
-  await new Promise(r => setTimeout(r, 30000));
-  
-  // 記録終了
-  const result = await recorder.stop();
-  
-  // 結果を保存
-  require('fs').writeFileSync('output.json', JSON.stringify(result, null, 2));
-}
+  const page = await recorder.start('https://example.com');
 
-main();
+  // オプション: 操作を自動化
+  await page.click('button#login');
+  await page.fill('input#username', 'test');
+
+  await new Promise(r => setTimeout(r, 30000));
+
+  const result = await recorder.stop();
+  console.log(`${result.entries.length}件のAPI呼び出しを記録しました`);
+}
 ```
 
 ## トラブルシューティング
 
 ### ブラウザが起動しない
-
 ```bash
-# Playwrightのブラウザを再インストール
 npx playwright install chromium
 ```
 
-### APIが記録されない
+### APIがキャプチャされない
+- `--include`パターンが実際のAPIパスとマッチするか確認
+- DevToolsのNetworkタブでAPI URLを確認
+- `--include "*"`ですべてをキャプチャして試す
 
-1. `--include` パターンを確認
-2. 実際のAPIパスを開発者ツールで確認
-3. より広いパターン（例: `*`）で試す
+### ヘッドレスモードが失敗する
+- 一部のサイトはヘッドレスブラウザをブロック
+- `--headless`フラグを削除
 
-### ヘッドレスモードで動作しない
+## リファレンスドキュメント
 
-一部のサイトはヘッドレス検出があります。`--headless` を外して試してください。
+完全なドキュメントは以下を参照:
+- **すべてのオプションと例:** [REFERENCE.md](REFERENCE.md)
+- **ステップバイステップチュートリアル:** [TUTORIAL.md](TUTORIAL.md)
 
-### 認証が必要なAPI
+## サポート環境
 
-1. ヘッドレスモードをオフにする
-2. ブラウザでログインしてから操作を続ける
-3. 認証トークンはヘッダーに記録される（取り扱い注意）
-
-## 注意事項
-
-- 認証情報（Authorization、Cookieヘッダー等）はそのまま記録されます
-- WebSocket通信は記録対象外です
-- 記録したログの取り扱いに注意してください
+- ✅ Claude Code
+- ✅ Claude Desktop
+- ✅ Claude.ai (Computer Use)
+- ✅ Windows / macOS / Linux
 
 ## ファイル構成
 
 ```
 api-recorder/
-├── SKILL.md              # このファイル
-├── TUTORIAL.md           # チュートリアル
-├── package.json          # 依存関係
+├── SKILL.md          # このファイル
+├── REFERENCE.md      # 完全リファレンス（英語）
+├── TUTORIAL.md       # チュートリアル（日本語）
 ├── src/
-│   ├── cli.js            # CLIエントリポイント
-│   └── recorder.js       # コアロジック
-└── examples/
-    └── sample_output.json
+│   ├── cli.js        # CLIツール
+│   └── recorder.js   # コアロジック
+└── package.json      # 依存関係
 ```
+
+## 重要な注意事項
+
+- **セキュリティ:** 認証トークン、Cookie、APIキーをキャプチャ - ログを慎重に取り扱う
+- **WebSocket:** サポート外（HTTP/HTTPSのみ）
+- **レスポンスサイズ:** 大きなレスポンスは切り詰められる（`--body-limit`で設定可能）
+- **.gitignore:** 機密記録をコミットしないよう`*.json`を追加
+
+## 次のステップ
+
+1. **初めて?** ガイド付きウォークスルーは[TUTORIAL.md](TUTORIAL.md)参照
+2. **特定のオプションが必要?** すべての設定は[REFERENCE.md](REFERENCE.md)参照
+3. **統合?** CI/CD例は[REFERENCE.md](REFERENCE.md)参照
